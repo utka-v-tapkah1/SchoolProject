@@ -7,16 +7,16 @@ class Menu:
     def __init__(self, infrastructure: Infrastructure):
         self.infrastructure = infrastructure
 
-        self.b_start = Button(self.infrastructure.screen, self.infrastructure.clock,
+        self.b_start = Button(self.infrastructure.screen,
                               x=WIDTH // 2 * SCALE, y=SCALE * 4,
                               font=self.infrastructure.font, text="Начать")
-        self.b_settings = Button(self.infrastructure.screen, self.infrastructure.clock,
+        self.b_settings = Button(self.infrastructure.screen,
                               x=WIDTH // 2 * SCALE, y=SCALE * 5,
                               font=self.infrastructure.font, text="Настройки")
-        self.b_rules = Button(self.infrastructure.screen, self.infrastructure.clock,
+        self.b_rules = Button(self.infrastructure.screen,
                               x=WIDTH // 2 * SCALE, y=SCALE * 6,
                               font=self.infrastructure.font, text="Правила")
-        self.b_exit = Button(self.infrastructure.screen, self.infrastructure.clock,
+        self.b_exit = Button(self.infrastructure.screen,
                               x=WIDTH // 2 * SCALE, y=SCALE * 7,
                               font=self.infrastructure.font, text="Выход")
 

@@ -56,7 +56,13 @@ class QuestionsDataBase:
         return self.cursor.execute(f'SELECT question FROM Questions WHERE id == {x}').fetchone()[0]
 
     def get_answer(self, x):
-        return self.cursor.execute(f'SELECT answer FROM Questions WHERE id == {x}').fetchone()[0]
+        return self.cursor.execute(f'SELECT t_answer FROM Questions WHERE id == {x}').fetchone()[0]
+
+    def get_max_id(self):
+        return len(self.cursor.execute('SELECT id FROM Questions').fetchall())
+
+    def get_all_answers(self, x):
+        return self.cursor.execute(f'SELECT answer1, answer2, answer3, answer4 FROM Questions WHERE id == {x}').fetchone()
 
     def __del__(self):
         self.connection.commit()

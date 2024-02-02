@@ -5,9 +5,8 @@ pygame.init()
 
 
 class Button:
-    def __init__(self, screen, clock, x: int, y: int, font: pygame.font.Font, text: str, color=BASE_COLOR):
+    def __init__(self, screen, x: int, y: int, font: pygame.font.Font, text: str, color=BASE_COLOR):
         self.screen = screen
-        self.clock = clock
         self.color = color
         self.text = font.render(text, True, self.color)
         self.rect = self.text.get_rect()

@@ -4,6 +4,7 @@ from src.snake import Snake
 from src.infrastructure import Infrastructure
 from src.settings import *
 from src.utils import *
+from src.button import Button
 
 
 class Game:
@@ -23,6 +24,11 @@ class Game:
         self.is_game_over = False
         self.is_win = False
         self.is_stop = True
+        self.is_question = True
+        self.n_question = 1
+        self.texts = []
+        self.buttons = []
+        self.start_question()
 
     def draw_plus_coin(self):
         self.tick_counter_coin += 1
@@ -31,12 +37,36 @@ class Game:
         if self.tick_counter_coin >= 20:
             self.tick_counter_coin = 0
 
+    def start_question(self):
+        self.is_question, self.is_stop = True, True
+        self.n_question = randint(1, questions_db.get_max_id())
+        self.texts = []
+        for i in range(len(questions_db.get_question(self.n_question)) // 47 + 1):
+            self.texts += [questions_db.get_question(self.n_question)[i * 47:(i + 1) * 47]]
+        self.buttons = []
+        for n, text in enumerate(questions_db.get_all_answers(self.n_question)):
+            self.buttons += [Button(self.infrastructure.screen, 10 * SCALE, (n + 5) * SCALE,
+                             self.infrastructure.font, text, "black")]
+
     def question(self):
-        pass
+        is_running = True
+        self.infrastructure.draw_element(1, 1, SCALE * 18, 0, BASE_COLOR)
+        for n, text in enumerate(self.texts):
+            self.infrastructure.draw_text(text, "black", (10 * SCALE, (n + 2) * SCALE))
+        for n, button in enumerate(self.buttons):
+            if button.draw() and n+1 == questions_db.get_answer(self.n_question):
+                print('f')
+
+        # self.balance += 1
+        # self.tick_counter_coin = 1
+        return is_running
+    
     def process_events(self):
         self.is_running = not self.infrastructure.pressed_esc()
         new_direction = self.infrastructure.key_get_pressed()
         if len(self.snake.snake) <= 1 and new_direction is not None:
+            self.is_stop = False
+        if self.is_question and new_direction is not None:
             self.is_stop = False
         if new_direction is not None:
             self.snake.set_direction(new_direction)
@@ -55,6 +85,10 @@ class Game:
         if self.coin:
             self.infrastructure.draw_element(self.coin.x, self.coin.y, ELEMENT_SIZE, 100, COIN_COLOR)
         self.infrastructure.draw_text(f"Счёт: {self.score}", BASE_COLOR, (WIDTH // 2 * SCALE, SCALE * 0.4))
+
+        if self.is_question:
+            self.is_question = self.question()
+
         if self.tick_counter_coin >= 1:
             self.draw_plus_coin()
 
@@ -85,7 +119,7 @@ class Game:
                 elif head == self.apple:
                     self.score += 1
                     self.apple = gen_apple(self.snake)
-                    if randint(1, 7) == 7 and len(self.snake.snake) < WIDTH * HEIGHT - 1:
+                    if randint(1, 1) == 1 and len(self.snake.snake) < WIDTH * HEIGHT - 1:
                         self.coin = gen_coin(self.snake, self.apple)
                     else:
                         self.coin = False
@@ -95,8 +129,7 @@ class Game:
                     if head == self.coin:
                         self.last_coin = self.coin
                         self.coin = False
-                        self.balance += 1
-                        self.tick_counter_coin = 1
+                        self.start_question()
             else:
                 self.is_game_over = True
 
