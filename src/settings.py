@@ -11,7 +11,7 @@ INITIAL_SPEED_DELAY = FPS
 
 APPLE_COLOR = "red"
 COIN_COLOR = "gold"
-BASE_COLOR = "white"
+BASE_COLOR = "#efefef"
 SCREEN_COLOR = "black"
 GAME_OVER_COLOR = "#ff390d"
 

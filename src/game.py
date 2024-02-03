@@ -14,7 +14,6 @@ class Game:
         self.snake = Snake(head)
         self.apple: Element = gen_apple(self.snake)
         self.coin: Element = False
-        self.last_coin: Element = self.coin
         self.tick_counter = 0
         self.tick_counter_coin = 0
         self.score = 0
@@ -24,16 +23,16 @@ class Game:
         self.is_game_over = False
         self.is_win = False
         self.is_stop = True
-        self.is_question = True
+        self.is_question = False
         self.n_question = 1
+        self.b_exit: Button
         self.texts = []
         self.buttons = []
-        self.start_question()
+        self.flag = True
 
     def draw_plus_coin(self):
         self.tick_counter_coin += 1
-        self.infrastructure.draw_text("+1", COIN_COLOR, (self.last_coin.x * SCALE + SCALE // 2,
-                                                         self.last_coin.y * SCALE - 25))
+        self.infrastructure.draw_text("+1", COIN_COLOR, (SCALE * 19-20, SCALE * 0.4))
         if self.tick_counter_coin >= 20:
             self.tick_counter_coin = 0
 
@@ -45,8 +44,10 @@ class Game:
             self.texts += [questions_db.get_question(self.n_question)[i * 47:(i + 1) * 47]]
         self.buttons = []
         for n, text in enumerate(questions_db.get_all_answers(self.n_question)):
-            self.buttons += [Button(self.infrastructure.screen, 10 * SCALE, (n + 5) * SCALE,
+            self.buttons += [Button(self.infrastructure, 10 * SCALE, (n + 5) * SCALE,
                              self.infrastructure.font, text, "black")]
+        self.b_exit = Button(self.infrastructure, 17 * SCALE, 9 * SCALE,
+                             self.infrastructure.font, "Выйти", "black")
 
     def question(self):
         is_running = True
@@ -54,11 +55,16 @@ class Game:
         for n, text in enumerate(self.texts):
             self.infrastructure.draw_text(text, "black", (10 * SCALE, (n + 2) * SCALE))
         for n, button in enumerate(self.buttons):
-            if button.draw() and n+1 == questions_db.get_answer(self.n_question):
-                print('f')
+            if button.draw():
+                if n+1 == questions_db.get_answer(self.n_question):
+                    is_running = False
+                    self.balance += 1
+                    self.tick_counter_coin = 1
+                else:
+                    is_running = False
+        if self.b_exit.draw():
+            is_running = False
 
-        # self.balance += 1
-        # self.tick_counter_coin = 1
         return is_running
     
     def process_events(self):
@@ -66,8 +72,9 @@ class Game:
         new_direction = self.infrastructure.key_get_pressed()
         if len(self.snake.snake) <= 1 and new_direction is not None:
             self.is_stop = False
-        if self.is_question and new_direction is not None:
-            self.is_stop = False
+        if self.is_stop:
+            if not self.is_question and new_direction is not None:
+                self.is_stop = False
         if new_direction is not None:
             self.snake.set_direction(new_direction)
 
@@ -85,6 +92,7 @@ class Game:
         if self.coin:
             self.infrastructure.draw_element(self.coin.x, self.coin.y, ELEMENT_SIZE, 100, COIN_COLOR)
         self.infrastructure.draw_text(f"Счёт: {self.score}", BASE_COLOR, (WIDTH // 2 * SCALE, SCALE * 0.4))
+        self.infrastructure.draw_text(f"Монеты: {self.balance}", BASE_COLOR, (SCALE * 16, SCALE * 0.4))
 
         if self.is_question:
             self.is_question = self.question()
@@ -92,8 +100,11 @@ class Game:
         if self.tick_counter_coin >= 1:
             self.draw_plus_coin()
 
-        if self.is_game_over:
-            self.infrastructure.draw_text(f"Конец игры", GAME_OVER_COLOR, (WIDTH // 2 * SCALE, HEIGHT // 2 * SCALE))
+        if self.is_win:
+            self.infrastructure.draw_text("Победа!", COIN_COLOR, (WIDTH // 2 * SCALE, HEIGHT // 2 * SCALE))
+
+        elif self.is_game_over:
+            self.infrastructure.draw_text("Проигрыш!", GAME_OVER_COLOR, (WIDTH // 2 * SCALE, HEIGHT // 2 * SCALE))
 
     def update_state(self):
         if self.is_stop:
@@ -101,12 +112,17 @@ class Game:
         elif self.is_win:
             if self.score > user_db.get_mscore():
                 user_db.upd_mscore(self.score)
-            user_db.upd_bal(self.balance)
-            user_db.upd_bal(5)
+            if self.flag:
+                user_db.upd_bal(self.balance)
+                user_db.upd_bal(5)
+                self.flag = False
+            return
         elif self.is_game_over:
             if self.score > user_db.get_mscore():
                 user_db.upd_mscore(self.score)
-            user_db.upd_bal(self.balance)
+            if self.flag:
+                user_db.upd_bal(self.balance)
+                self.flag = False
             return
 
         self.tick_counter += 2
@@ -127,7 +143,6 @@ class Game:
                     self.snake.dequeue()
                 if self.coin:
                     if head == self.coin:
-                        self.last_coin = self.coin
                         self.coin = False
                         self.start_question()
             else:
