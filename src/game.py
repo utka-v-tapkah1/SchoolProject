@@ -114,7 +114,7 @@ class Game:
                 user_db.upd_mscore(self.score)
             if self.flag:
                 user_db.upd_bal(self.balance)
-                user_db.upd_bal(5)
+                user_db.upd_bal(10)
                 self.flag = False
             return
         elif self.is_game_over:
@@ -135,7 +135,7 @@ class Game:
                 elif head == self.apple:
                     self.score += 1
                     self.apple = gen_apple(self.snake)
-                    if randint(1, 1) == 1 and len(self.snake.snake) < WIDTH * HEIGHT - 1:
+                    if randint(1, 7) == 7 and len(self.snake.snake) < WIDTH * HEIGHT - 1:
                         self.coin = gen_coin(self.snake, self.apple)
                     else:
                         self.coin = False

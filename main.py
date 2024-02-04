@@ -37,6 +37,7 @@ if __name__ == "__main__":
                 game = Game(infrastructure)
                 is_running_game = True
             elif menu.is_settings():
+                menu_settings = MenuSettings(infrastructure)
                 is_running_settings = True
             elif menu.is_rules():
                 is_running_rules = True

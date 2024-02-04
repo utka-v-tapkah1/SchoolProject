@@ -1,4 +1,5 @@
 import sqlite3
+from src.settings import *
 
 
 class UserDataBase:
@@ -50,6 +51,16 @@ class QuestionsDataBase:
                             answer4 TEXT NOT NULL
                         )
                         ''')
+        questions = [
+            ["Какова доля азота в атмосфере?", 1, "78%", "12%", "31%", "96%"],
+            ["Сколько ребер у куба?", 1, "12", "6", "8", "4"],
+            ["Какую религию исповедовали в Древнем Китае?", 3, "Христианство", "Ислам", "Буддизм", "Иудаизм"],
+            ["Кому принадлежит фраза - Карету мне! Карету!?", 1, "Чацкому", "Болконскому", "Обломову", "Онегину"]
+        ]
+        if self.cursor.execute('SELECT question FROM Questions').fetchone() is None:
+            for question in questions:
+                self.cursor.execute('''INSERT INTO Questions (question, t_answer, answer1, answer2, answer3, answer4)
+                                    VALUES (?, ?, ?, ?, ?, ?)''', question)
         self.connection.commit()
 
     def get_question(self, x):
@@ -82,8 +93,13 @@ class SettingsDataBase:
                             it BOOLEAN NOT NULL
                         )
                         ''')
-        skins = ["yellow,#ffe100",
-                 "green,#04d100"]
+        skins = [
+            "yellow,#ffe100",
+            "green,#04d100",
+            "red,#a50000",
+            "blue,#0000c1",
+            "#ff61f1,#d945cc"
+        ]
         if self.cursor.execute('SELECT id FROM Settings').fetchone() is None:
             self.cursor.execute(f'INSERT INTO Settings (in_stock, skin, it) VALUES (1, "{skins[0]}", 1)')
             for skin in skins[1:]:
@@ -100,9 +116,17 @@ class SettingsDataBase:
         return self.cursor.execute(f'SELECT skin FROM Settings WHERE it == 1').fetchone()[0]
 
     def take_skin(self, x):
-        self.cursor.execute(f'UPDATE Settings SET it == 1 WHERE id == {x}')
+        self.cursor.execute(f'UPDATE Settings SET it = 0 WHERE id == {self.get_my_id()}')
+        self.cursor.execute(f'UPDATE Settings SET it = 1 WHERE id == {x}')
+        self.connection.commit()
 
-    def get_id(self):
+    def buy_skin(self, x):
+        self.cursor.execute(f'UPDATE Settings SET it = 0 WHERE it == 1')
+        self.cursor.execute(f'UPDATE Settings SET it = 1 WHERE id == {x}')
+        self.cursor.execute(f'UPDATE Settings SET in_stock = 1 WHERE id == {x}')
+        self.connection.commit()
+
+    def get_my_id(self):
         return self.cursor.execute(f'SELECT id FROM Settings WHERE skin == "{self.get_my_skin()}"').fetchone()[0]
 
     def get_max_id(self):
