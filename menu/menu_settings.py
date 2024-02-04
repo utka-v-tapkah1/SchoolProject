@@ -15,6 +15,8 @@ class MenuSettings:
                              self.infrastructure.font, "Взять", BASE_COLOR)
         self.b_buy = Button(self.infrastructure, 600, SCALE * 2 + 25,
                             self.infrastructure.font, "Купить", BASE_COLOR)
+        self.b_reset = Button(self.infrastructure, WIDTH * SCALE - 150, HEIGHT * SCALE - 50,
+                              self.infrastructure.font, "Сбросить счёт", BASE_COLOR)
 
     def scroll_skins(self):
         self.infrastructure.draw_text("Скин", BASE_COLOR, (WIDTH // 2 * SCALE, SCALE))
@@ -40,7 +42,12 @@ class MenuSettings:
                 settings_db.buy_skin(self.id)
                 user_db.upd_bal(-10)
 
+    def reset(self):
+        if self.b_reset.draw():
+            user_db.upd_mscore(0)
+
     def loop(self):
         self.infrastructure.draw_text(f"Баланс: {user_db.get_bal()}", BASE_COLOR, (WIDTH * SCALE - 100, SCALE))
+        self.reset()
         self.scroll_skins()
         return not self.infrastructure.pressed_esc()
