@@ -29,7 +29,9 @@ class MenuSettings:
             else:
                 self.id -= 1
         self.infrastructure.draw_element(5.90, 1.95, ELEMENT_SIZE, RADIUS, settings_db.get_skin(self.id).split(',')[0])
-        if settings_db.skin_in_stock(self.id):
+        if settings_db.get_my_id() == self.id:
+            pass
+        elif settings_db.skin_in_stock(self.id):
             if self.b_take.draw():
                 settings_db.take_skin(self.id)
         else:
